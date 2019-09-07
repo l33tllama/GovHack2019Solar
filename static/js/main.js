@@ -27,7 +27,7 @@ function resize_error_msg(){
 }
 
 function generate_roof_output(area){
-    var watt_per_sqm = 175;
+    var watt_per_sqm = 150;
     var output = 0;
     if(selected_roof == 1){
         output = area * watt_per_sqm * 0.6;
@@ -46,11 +46,13 @@ function render_results(watts){
     var kwh = watts / 1000;
     var avg_dollar_cost = 0.21;
     var avg_yearly_cost = avg_kwh * 365 * avg_dollar_cost;
+    var feed_in_cost = 0.15;
     console.log("Yearly cost: " + avg_yearly_cost);
     console.log("Yearly generation: " + (kwh * 24) * 365 * avg_dollar_cost);
     var net_pwr_year_cost = (avg_kwh - (kwh * 24)) * 365 * avg_dollar_cost;
     var earn_or_save = "savings";
     if(net_pwr_year_cost < 0){
+        net_pwr_year_cost = (avg_kwh - (kwh * 24)) * 365 * feed_in_cost;
         earn_or_save = "earnings";
     }
     $("#area").html("<div class=\"container\">\n" +
@@ -89,7 +91,10 @@ function generate_results(){
     $("#area").html("");
     $.ajax("/get_area?lat=" + lat + "&lng=" + lng).done(function(resp){
         hide($("#loading-bar"));
-        var watts = generate_roof_output(parseFloat(resp))
+        var area = resp.split(",")[0]
+        var heritage = resp.split(",")[1]
+        console.log(resp);
+        var watts = generate_roof_output(parseFloat(area))
         render_results(watts);
     });
 }

@@ -34,24 +34,28 @@ def get_area_by_latlng(lat, lng):
     where st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326))), geom); ".format(poi)
     """
 
-    cur_command = "SELECT ST_Area(geom) as AREA from buildings \
+    cur_command = "SELECT ST_Area(geom) as AREA, heritage_zone, heritage_listed from buildings \
         where st_contains((select geom from parcels \
         where st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326))), st_centroid(geom))".format(poi)
 
     curs.execute(cur_command)
 
     largest_area = 0
+    largest_area_heritage = 0
     areas = []
 
     for row in curs.fetchall():
         print(row[0])
-        areas.append(row[0])
+        areas.append([row[0], row[1]])
+
+    largest_area_heritage = areas[0][1]
 
     for area in areas:
-        if area > largest_area:
-            largest_area = area
+        if area[0] > largest_area:
+            largest_area = area[0]
+            largest_area_heritage = area[1]
 
-    return largest_area
+    return str(largest_area) + "," + str(largest_area_heritage)
 
 # Disable caching!
 @app.after_request
@@ -69,7 +73,7 @@ def add_header(r):
 
 @app.route("/")
 def main():
-    return render_template('index.html', google_api_key = api_key)
+    return render_template('index.html', google_api_key=api_key)
 
 
 @app.route("/get_area")
