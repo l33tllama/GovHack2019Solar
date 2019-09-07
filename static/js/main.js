@@ -4,6 +4,7 @@ var page2_override = true;
 var area;
 var heritage_zone;
 var heritage_listed;
+var avg_kwh = 35;
 
 function hide(el){
     el.attr("hidden", "");
@@ -33,25 +34,25 @@ function generate_roof_output(area){
     var watt_per_sqm = 150;
     var output = 0;
     if(selected_roof == 1){
-        output = area * watt_per_sqm * 0.6;
-    } else if(selected_roof == 2){
         output = area * watt_per_sqm * 0.4;
+    } else if(selected_roof == 2){
+        output = area * watt_per_sqm * 0.25;
     } else if(selected_roof == 3){
-        output = area * watt_per_sqm;
+        output = area * watt_per_sqm * 0.6;
     } else if(selected_roof == 4){
-        output = area *  watt_per_sqm * 0.65;
+        output = area *  watt_per_sqm * 0.45;
     }
     return output * 0.4;
 }
 
 function render_results(watts){
-    var area_contents = "";
+    var area_contents = "<hr/>";
     if(watts == 0){
-        area_contents = "<h2>Sorry, there was an issue finding your address.</h2>";
+        area_contents += "<h2>Sorry, there was an issue finding your address.</h2>";
          $("#area").html(area_contents);
          return;
     }
-    var avg_kwh = 35;
+    //avg_kwh = 35;
     var kwh = watts / 1000;
     var avg_dollar_cost = 0.21;
     var avg_yearly_cost = avg_kwh * 365 * avg_dollar_cost;
@@ -64,6 +65,19 @@ function render_results(watts){
         net_pwr_year_cost = (avg_kwh - (kwh * 24)) * 365 * feed_in_cost;
         earn_or_save = "earnings";
     }
+    var low_checked = "";
+    var med_checked = "";
+    var high_checked = "";
+    if(avg_kwh == 20){
+        low_checked = "checked";
+    }
+    if(avg_kwh == 35){
+        med_checked = "checked";
+    }
+    if(avg_kwh == 45){
+        high_checked = "checked";
+    }
+
 
     if(heritage_zone == "1" && !(heritage_listed == "1")){
         area_contents += "<h2>Warning: This property is in a heritage zone. There may be restrictions.";
@@ -72,7 +86,26 @@ function render_results(watts){
         area_contents += "<h3>Warning: This property is heritage listed. It is unlikely that you will be able to install a solar panel.</h3>";
     }
 
-    area_contents += "<div class=\"container\">\n" +
+    area_contents += "<h3>Select your average power consumption</h3>\n" +
+        "<div id='power-usage'>" +
+        "<div class=\"form-check\">\n" +
+        " <ul>"+
+        "  <li><input class=\"form-check-input\" type=\"radio\" name=\"power-low\" id=\"power-low\" value=\"option1\"" + low_checked+ ">\n" +
+        "  <label class=\"form-check-label\" for=\"power-low\">\n" +
+        "    Low - 20kWh per day\n" +
+        "  </label></li>\n" +
+        "  <li><input class=\"form-check-input\" type=\"radio\" name=\"power-med\" id=\"power-med\" value=\"option2\"" + med_checked + ">\n" +
+        "  <label class=\"form-check-label\" for=\"power-med\">\n" +
+        "    Medium - 35kWh per day\n" +
+        "  </label></li>\n" +
+        "  <li><input class=\"form-check-input\" type=\"radio\" name=\"power-high\" id=\"power-high\" value=\"option3\"" + high_checked + ">\n" +
+        "  <label class=\"form-check-label\" for=\"power-high\">\n" +
+        "    High - 45kWh per day\n" +
+        "  </label></li>\n" +
+        "</ul>" +
+        "</div>";
+
+    area_contents += "<hr/><div class=\"container\">\n" +
         "  <div class=\"row\">\n" +
         "    <div class=\"col\">\n" +
         "     <h2>KiloWatt output:</h2>\n" +
@@ -100,6 +133,18 @@ function render_results(watts){
         "<p>* Based on average household power usage.</p>"
 
     $("#area").html(area_contents);
+    $("#power-low").click(function(){
+        avg_kwh = 20;
+        render_results(watts);
+    });
+    $("#power-med").click(function(){
+        avg_kwh = 35;
+        render_results(watts);
+    });
+    $("#power-high").click(function(){
+        avg_kwh = 45;
+        render_results(watts);
+    });
 }
 
 function show_results(){
