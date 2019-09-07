@@ -38,15 +38,59 @@ function generate_roof_output(area){
     } else if(selected_roof == 4){
         output = area *  watt_per_sqm * 0.65;
     }
-    return output;
+    return output * 0.4;
+}
+
+function render_results(watts){
+    var avg_kwh = 35;
+    var kwh = watts / 1000;
+    var avg_dollar_cost = 0.21;
+    var avg_yearly_cost = avg_kwh * 365 * avg_dollar_cost;
+    console.log("Yearly cost: " + avg_yearly_cost);
+    console.log("Yearly generation: " + (kwh * 24) * 365 * avg_dollar_cost);
+    var net_pwr_year_cost = (avg_kwh - (kwh * 24)) * 365 * avg_dollar_cost;
+    var earn_or_save = "savings";
+    if(net_pwr_year_cost < 0){
+        earn_or_save = "earnings";
+    }
+    $("#area").html("<div class=\"container\">\n" +
+        "  <div class=\"row\">\n" +
+        "    <div class=\"col\">\n" +
+        "     <h2>KiloWatt output:</h2>\n" +
+        "    </div>\n" +
+        "    <div class=\"col\">\n" +
+        "      <h2>" + Math.floor(kwh) +" KW</h2>\n" +
+        "    </div>" +
+        "  </div>" +
+        "  <div class=\"row\">\n" +
+        "    <div class=\"col\">\n" +
+        "     <h2>Yearly output:</h2>\n" +
+        "    </div>\n" +
+        "    <div class=\"col\">\n" +
+        "      <h2>" + Math.floor(((watts * 365) * 24) / 1000000 ) +" MWh</h2>\n" +
+        "    </div>" +
+        "  </div>" +
+        "  <div class=\"row\">\n" +
+        "    <div class=\"col\">\n" +
+        "     <h2>Yearly " + earn_or_save + "*:</h2>\n" +
+        "    </div>\n" +
+        "    <div class=\"col\">\n" +
+        "      <h2>$" + Math.floor(Math.abs(net_pwr_year_cost)) +"</h2>\n" +
+        "    </div>" +
+        "  </div>" +
+        "<p>* Based on average household power usage.</p>"
+    );
 }
 
 function generate_results(){
     var lat = place.geometry.location.lat();
     var lng = place.geometry.location.lng();
+    show($("#loading-bar"));
+    $("#area").html("");
     $.ajax("/get_area?lat=" + lat + "&lng=" + lng).done(function(resp){
-
-        $("#area").text(generate_roof_output(parseFloat(resp)));
+        hide($("#loading-bar"));
+        var watts = generate_roof_output(parseFloat(resp))
+        render_results(watts);
     });
 }
 

@@ -1,9 +1,23 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
+import configparser
 import psycopg2
 
 # Flask App
 app = Flask(__name__, static_folder="static")
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.debug = False
+
+config_filename = "config.cfg"
+
+config = configparser.ConfigParser()
+config.read(config_filename)
+
+api_key = config['Main']['GoogleAPIKey']
+
+
+# Perform query to get PostGIS data about whether location is within area of heritage area
+def check_if_heritage_area(lat, lng):
+    pass
 
 
 # Perform Postgres query to get PostGIS data about selected location
@@ -15,9 +29,14 @@ def get_area_by_latlng(lat, lng):
 
     print(poi)
 
-    cur_command = "select ST_Area(geom) as AREA, * from building_footprints \
+    """cur_command = "select ST_Area(geom) as AREA, * from building_footprints \
     where st_contains((select geom from parcels_hobart \
     where st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326))), geom); ".format(poi)
+    """
+
+    cur_command = "SELECT ST_Area(geom) as AREA from buildings \
+        where st_contains((select geom from parcels \
+        where st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326))), st_centroid(geom))".format(poi)
 
     curs.execute(cur_command)
 
@@ -50,7 +69,7 @@ def add_header(r):
 
 @app.route("/")
 def main():
-    return app.send_static_file('index.html')
+    return render_template('index.html', google_api_key = api_key)
 
 
 @app.route("/get_area")
@@ -65,5 +84,6 @@ def get_area():
 
 def run():
     app.run(host="0.0.0.0", port=80)
+
 
 run()
