@@ -2,7 +2,8 @@ var current_page = 1;
 var selected_roof = 0;
 var page2_override = true;
 var area;
-var heritage;
+var heritage_zone;
+var heritage_listed;
 
 function hide(el){
     el.attr("hidden", "");
@@ -44,6 +45,12 @@ function generate_roof_output(area){
 }
 
 function render_results(watts){
+    var area_contents = "";
+    if(watts == 0){
+        area_contents = "<h2>Sorry, there was an issue finding your address.</h2>";
+         $("#area").html(area_contents);
+         return;
+    }
     var avg_kwh = 35;
     var kwh = watts / 1000;
     var avg_dollar_cost = 0.21;
@@ -57,7 +64,15 @@ function render_results(watts){
         net_pwr_year_cost = (avg_kwh - (kwh * 24)) * 365 * feed_in_cost;
         earn_or_save = "earnings";
     }
-    $("#area").html("<div class=\"container\">\n" +
+
+    if(heritage_zone == "1" && !(heritage_listed == "1")){
+        area_contents += "<h2>Warning: This property is in a heritage zone. There may be restrictions.";
+    }
+    if(heritage_listed == "1"){
+        area_contents += "<h3>Warning: This property is heritage listed. It is unlikely that you will be able to install a solar panel.</h3>";
+    }
+
+    area_contents += "<div class=\"container\">\n" +
         "  <div class=\"row\">\n" +
         "    <div class=\"col\">\n" +
         "     <h2>KiloWatt output:</h2>\n" +
@@ -83,7 +98,8 @@ function render_results(watts){
         "    </div>" +
         "  </div>" +
         "<p>* Based on average household power usage.</p>"
-    );
+
+    $("#area").html(area_contents);
 }
 
 function show_results(){
@@ -101,7 +117,8 @@ function load_area(){
         console.log("Loaded area from latlon");
         hide($("#loading-bar"));
         area = resp.split(",")[0]
-        heritage = resp.split(",")[1]
+        heritage_zone = resp.split(",")[1]
+        heritage_listed = resp.split(",")[2]
         console.log(resp);
         show_results();
     });

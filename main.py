@@ -47,21 +47,31 @@ def get_area_by_latlng(lat, lng):
     curs.execute(cur_command)
 
     largest_area = 0
-    largest_area_heritage = 0
+    largest_area_heritage_zone = 0
+    largest_area_heritage_listed = 0
     areas = []
-
-    for row in curs.fetchall():
+    results = curs.fetchall()
+    for row in results:
         print(row[0])
-        areas.append([row[0], row[1]])
+        areas.append([row[0], row[1], row[2]])
+    if len(results) > 0:
+        largest_area_heritage_zone = areas[0][1]
+        largest_area_heritage_listed = areas[0][1]
 
-    largest_area_heritage = areas[0][1]
+        for area in areas:
+            if area[0] > largest_area:
+                print(area)
+                try:
+                    largest_area = area[0]
+                    largest_area_heritage_zone = area[1]
+                    largest_area_heritage_listed = area[2]
+                except IndexError as e:
+                    print("ERROR!! index out range")
+                    print(e)
 
-    for area in areas:
-        if area[0] > largest_area:
-            largest_area = area[0]
-            largest_area_heritage = area[1]
-
-    return str(largest_area) + "," + str(largest_area_heritage)
+        return str(largest_area) + "," + str(largest_area_heritage_zone) + "," + str(largest_area_heritage_listed)
+    else:
+        return "0,0,0"
 
 # Disable caching!
 @app.after_request
