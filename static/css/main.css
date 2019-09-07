@@ -1,0 +1,86 @@
+#main{
+    margin: 0 auto;
+    width: 600px;
+    text-align: center;
+    /*background-color: #0f0;*/
+}
+#title{
+    text-align: center;
+}
+#ok-btn-container-1, #ok-btn-container-2{
+    margin-top: 10px;
+    width: 495px;
+    text-align: right;
+}
+#navbar-main{
+    vertical-align: bottom;
+}
+#nrg-logo{
+    margin-top: -5px;
+    width: 32px;
+    height: 32px;
+    margin-right: 5px;
+}
+#nrg-logo-main{
+    margin-top: 10px;
+    width: 175px;
+    height: 175px;
+}
+#error-msg-container{
+    top: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+#error-msg{
+    width: 300px;
+    height: 150px;
+    /*margin: 0 auto;*/
+    text-align: center;
+    /*margin-top: 25px;*/
+    background-color: #fff;
+}
+#error-msg-contents{
+   bottom: 0;
+}
+
+.navbar-button{
+    margin-left: 5px;
+    margin-right: 5px;
+    text-decoration: underline;
+    /*text-underline: #1d2124;*/
+}
+.roof-type{
+    width: 175px;
+    height: 175px;
+}
+.selected-roof{
+    border: 1px solid #000 !important;
+    background-color: #f7f7f7;
+}
+.roof{
+    border: 1px solid #fff;
+}
+
+
+@media (max-width:600px) {
+    #main {
+        width: auto;
+        /*background-color: #f00;*/
+    }
+    #searchTextField{
+        width: 75%;
+    }
+    #ok-btn-container-1, #ok-btn-container-2{
+        width: 88%;
+    }
+    .roof-type{
+        width: 125px;
+        height: 125px;
+    }
+    #nrg-logo-main{
+        width: 125px;
+        height: 125px;
+    }
+}

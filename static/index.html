@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NRG</title>
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="static/css/main.css">
+<!--     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDuv9Hn4-IAK2t7QNw3SZJF_REkycFLzAA&callback=initMap" type="text/javascript"></script>-->
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDuv9Hn4-IAK2t7QNw3SZJF_REkycFLzAA&libraries=places"></script>
+    <script type="text/javascript" src="static/js/jquery-3.4.1.min.js"></script>
+
+</head>
+
+<body>
+<div id="main">
+     <nav class="navbar navbar-expand-lg navbar-light bg-light" id="navbar-main">
+        <a class="navbar-brand" href="#"><img id="nrg-logo" src="/static/img/nrg.png"/>NRG</a>
+         <a href="#" class="navbar-button" id="nav-1">1 - search</a> |
+         <a href="#" class="navbar-button" id="nav-2">2 - roof</a> |
+         <a href="#" class="navbar-button" id="nav-3">3 - results</a>
+    </nav>
+<!--    <div id="windowwidth">Test</div>-->
+
+    <div id="search">
+<!--        <h1 id="title">NRG</h1>-->
+        <img id="nrg-logo-main" src="/static/img/nrg.png"/>
+        <h2>1. Enter your address</h2>
+        <input id="searchTextField" type="text" size="50"/>
+        <div id="ok-btn-container-1">
+            <button type="button" id="search-ok" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+    <div id="roof-selector" hidden="true">
+        <h1>2. Select your roof type</h1>
+        <div class="container">
+            <div class="row">
+                <div class="col roof" id="roof-1">
+                    <img class="roof-type" src="/static/img/roof_type_1.png">
+                    <h3>Type 1</h3>
+                </div>
+                <div class="col roof" id="roof-2">
+                     <img class="roof-type" src="/static/img/roof_type_2.png">
+                    <h3>Type 2</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col roof" id="roof-3">
+                    <img class="roof-type" src="/static/img/roof_type_3.png">
+                    <h3>Type 3</h3>
+                </div>
+                <div class="col roof" id="roof-4">
+                    <img class="roof-type" src="/static/img/roof_type_4.png">
+                    <h3>Type 4</h3>
+                </div>
+            </div>
+        </div>
+        <div id="ok-btn-container-2">
+            <button type="button" id="roof-ok" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+    <div id="results-page" hidden="true">
+        <h1>3. Results</h1>
+        <p id="area"></p>
+    </div>
+    <div id="heritage-page" hidden="true">
+        <h1>Unfortunately your house is heritage listed :(</h1>
+    </div>
+
+
+</div>
+<div id="error-msg-container" hidden>
+       <div id="error-msg">
+            <h3>Error</h3>
+            <p id="error-msg-contents">Message contents</p>
+            <button type="button" id="error-ok" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    var autocomplete;
+    var input;
+    var place = "";
+    function initialize() {
+        input = document.getElementById('searchTextField');
+        var options = {
+            componentRestrictions: {country: 'au'}
+        };
+
+        autocomplete = new google.maps.places.Autocomplete(input, options);
+
+        autocomplete.addListener("place_changed", function(){
+            place = autocomplete.getPlace();
+            console.log(place);
+            console.log(place.geometry.location.lat());
+            console.log(place.geometry.location.lng());
+        })
+    }
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+
+</script>
+<script type="text/javascript" src="static/js/main.js"></script>
+</html>
