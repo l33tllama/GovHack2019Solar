@@ -1,6 +1,8 @@
 var current_page = 1;
 var selected_roof = 0;
 var page2_override = true;
+var area;
+var heritage;
 
 function hide(el){
     el.attr("hidden", "");
@@ -84,18 +86,24 @@ function render_results(watts){
     );
 }
 
-function generate_results(){
+function show_results(){
+    var watts = generate_roof_output(parseFloat(area))
+    render_results(watts);
+}
+
+function load_area(){
     var lat = place.geometry.location.lat();
     var lng = place.geometry.location.lng();
     show($("#loading-bar"));
     $("#area").html("");
+    console.log("Loading....")
     $.ajax("/get_area?lat=" + lat + "&lng=" + lng).done(function(resp){
+        console.log("Loaded area from latlon");
         hide($("#loading-bar"));
-        var area = resp.split(",")[0]
-        var heritage = resp.split(",")[1]
+        area = resp.split(",")[0]
+        heritage = resp.split(",")[1]
         console.log(resp);
-        var watts = generate_roof_output(parseFloat(area))
-        render_results(watts);
+        show_results();
     });
 }
 
@@ -109,6 +117,7 @@ $(document).ready(function(){
         } else {
             hide($("#search"));
             show($("#roof-selector"));
+            load_area();
             current_page = 2;
         }
     });
@@ -122,7 +131,6 @@ $(document).ready(function(){
                hide($("#roof-selector"));
                show($("#results-page"));
                current_page = 3;
-               generate_results();
            }
        }
     });
@@ -179,7 +187,6 @@ $(document).ready(function(){
                     hide($("#search"));
                     show($("#results-page"));
                     current_page = 3;
-                    generate_results();
                 }
             }
         } else if(current_page == 2){

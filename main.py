@@ -33,10 +33,16 @@ def get_area_by_latlng(lat, lng):
     where st_contains((select geom from parcels_hobart \
     where st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326))), geom); ".format(poi)
     """
-
+    """
     cur_command = "SELECT ST_Area(geom) as AREA, heritage_zone, heritage_listed from buildings \
         where st_contains((select geom from parcels \
         where st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326))), st_centroid(geom))".format(poi)
+    """
+
+    cur_command = "SELECT ST_Area(geom) as AREA, heritage_zone, heritage_listed from buildings \
+        where st_contains((select geom from parcels where \
+        st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326)) \
+        order by st_area(geom) desc limit 1), st_centroid(geom))".format(poi)
 
     curs.execute(cur_command)
 
