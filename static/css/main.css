@@ -66,7 +66,26 @@
     text-align: left;
     list-style: none;
 }
-
+.power-rating-star{
+    font-size: 30pt !important;
+    border: 1pt solid #000 !important;
+    border-radius: 30pt;
+    padding: 5pt;
+    background-color: #000;
+    color: #ffd42a;
+}
+.row-1, .row-3{
+    background-color: #ddd;
+}
+#hhs-logo{
+    margin-top: 10px;
+    width: 50%;
+    height: 50%;
+    border: 1px solid #005cbf;
+}
+.description{
+    font-size: 9pt;
+}
 
 @media (max-width:600px) {
     #main {

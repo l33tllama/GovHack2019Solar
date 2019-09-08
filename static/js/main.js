@@ -4,6 +4,8 @@ var page2_override = true;
 var area;
 var heritage_zone;
 var heritage_listed;
+var shadow;
+let no_building_detected = false;
 var avg_kwh = 35;
 
 function hide(el){
@@ -42,12 +44,14 @@ function generate_roof_output(area){
     } else if(selected_roof == 4){
         output = area *  watt_per_sqm * 0.45;
     }
-    return output * 0.4;
+    return output * 0.4 * shadow;
 }
 
 function render_results(watts){
+    //console.log("Watts:" + watts);
     var area_contents = "<hr/>";
-    if(watts == 0){
+    if(watts == "0" || watts == 0 || watts === NaN || no_building_detected){
+        console.log("No building detected.");
         area_contents += "<h2>Sorry, there was an issue finding your address.</h2>";
          $("#area").html(area_contents);
          return;
@@ -80,10 +84,15 @@ function render_results(watts){
 
 
     if(heritage_zone == "1" && !(heritage_listed == "1")){
-        area_contents += "<h2>Warning: This property is in a heritage zone. There may be restrictions.";
+        area_contents += "<h5><i class=\"fa fa-exclamation-circle\" aria-hidden=\"true\"></i>\nWarning: This property " +
+            "is in a heritage zone. There may be restrictions on installing solar panels.</h5>";
     }
     if(heritage_listed == "1"){
-        area_contents += "<h3>Warning: This property is heritage listed. It is unlikely that you will be able to install a solar panel.</h3>";
+        area_contents += "<h5><i class=\"fa fa-exclamation-circle\" aria-hidden=\"true\"></i>\nWarning: This property" +
+            " is heritage listed. There will be restrictions on installing solar panels.</h5>";
+    }
+    if(heritage_listed == "1" && heritage_zone == "1"){
+        area_contents += "<h5>This property is also in a heritage zone.</h5>";
     }
 
     area_contents += "<h3>Select your average power consumption</h3>\n" +
@@ -102,11 +111,42 @@ function render_results(watts){
         "  <label class=\"form-check-label\" for=\"power-high\">\n" +
         "    High - 45kWh per day\n" +
         "  </label></li>\n" +
-        "</ul>" +
+        " </ul>" +
         "</div>";
 
+    var star_rating_contents = "<h3>Your rating:</h3>";
+    var star_rating = 0;
+    var rating_2 = 1000;
+    var rating_3 = 2500;
+    var rating_4 = 3500;
+    var rating_5 = 5000;
+
+    net_pwr_year_cost = Math.abs(net_pwr_year_cost);
+
+    if(earn_or_save == "savings"){
+        star_rating = 1;
+    } else {
+        if(net_pwr_year_cost >= rating_2 && net_pwr_year_cost < rating_3){
+            star_rating = 2;
+        } else if(net_pwr_year_cost >= rating_3 && net_pwr_year_cost < rating_4){
+            star_rating = 3;
+        } else if(net_pwr_year_cost >= rating_4 && net_pwr_year_cost < rating_5){
+            star_rating = 4;
+        } else if(net_pwr_year_cost >= rating_5){
+            star_rating = 5;
+        } else {
+            star_rating = 1;
+        }
+    }
+
+    console.log("Star rating: " + star_rating);
+
+    for(let i = 0; i < star_rating; i++){
+        star_rating_contents += "<i class=\"fa fa-star power-rating-star\" aria-hidden=\"true\"></i>\n";
+    }
+
     area_contents += "<hr/><div class=\"container\">\n" +
-        "  <div class=\"row\">\n" +
+        "  <div class=\"row row-1\">\n" +
         "    <div class=\"col\">\n" +
         "     <h2>KiloWatt output:</h2>\n" +
         "    </div>\n" +
@@ -114,7 +154,7 @@ function render_results(watts){
         "      <h2>" + Math.floor(kwh) +" KW</h2>\n" +
         "    </div>" +
         "  </div>" +
-        "  <div class=\"row\">\n" +
+        "  <div class=\"row row-2\">\n" +
         "    <div class=\"col\">\n" +
         "     <h2>Yearly output:</h2>\n" +
         "    </div>\n" +
@@ -122,7 +162,7 @@ function render_results(watts){
         "      <h2>" + Math.floor(((watts * 365) * 24) / 1000000 ) +" MWh</h2>\n" +
         "    </div>" +
         "  </div>" +
-        "  <div class=\"row\">\n" +
+        "  <div class=\"row row-3\">\n" +
         "    <div class=\"col\">\n" +
         "     <h2>Yearly " + earn_or_save + "*:</h2>\n" +
         "    </div>\n" +
@@ -130,9 +170,11 @@ function render_results(watts){
         "      <h2>$" + Math.floor(Math.abs(net_pwr_year_cost)) +"</h2>\n" +
         "    </div>" +
         "  </div>" +
+        star_rating_contents +
         "<p>* Based on average household power usage.</p>"
 
     $("#area").html(area_contents);
+
     $("#power-low").click(function(){
         avg_kwh = 20;
         render_results(watts);
@@ -157,13 +199,19 @@ function load_area(){
     var lng = place.geometry.location.lng();
     show($("#loading-bar"));
     $("#area").html("");
-    console.log("Loading....")
+    console.log("Loading....");
+    $("#results-for").text("For: " + place.formatted_address);
     $.ajax("/get_area?lat=" + lat + "&lng=" + lng).done(function(resp){
         console.log("Loaded area from latlon");
         hide($("#loading-bar"));
-        area = resp.split(",")[0]
-        heritage_zone = resp.split(",")[1]
-        heritage_listed = resp.split(",")[2]
+        area = resp.split(",")[0];
+        console.log("Area: " + area);
+        if(area == 0 || area == "0"){
+            no_building_detected = true
+        }
+        heritage_zone = resp.split(",")[1];
+        heritage_listed = resp.split(",")[2];
+        shadow = resp.split(",")[3];
         console.log(resp);
         show_results();
     });

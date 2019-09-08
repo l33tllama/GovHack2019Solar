@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from flask import Flask, request, render_template
 import configparser
 import psycopg2
@@ -39,7 +41,7 @@ def get_area_by_latlng(lat, lng):
         where st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326))), st_centroid(geom))".format(poi)
     """
 
-    cur_command = "SELECT ST_Area(geom) as AREA, heritage_zone, heritage_listed from buildings \
+    cur_command = "SELECT ST_Area(geom) as AREA, heritage_zone, heritage_listed, shadow from buildings \
         where st_contains((select geom from parcels where \
         st_contains(st_transform(geom,4326),ST_SetSRID(ST_MakePoint({0[1]},{0[0]}),4326)) \
         order by st_area(geom) desc limit 1), st_centroid(geom))".format(poi)
@@ -49,14 +51,16 @@ def get_area_by_latlng(lat, lng):
     largest_area = 0
     largest_area_heritage_zone = 0
     largest_area_heritage_listed = 0
+    largest_area_shadow = 0
     areas = []
     results = curs.fetchall()
     for row in results:
         print(row[0])
-        areas.append([row[0], row[1], row[2]])
+        areas.append([row[0], row[1], row[2], row[3]])
     if len(results) > 0:
         largest_area_heritage_zone = areas[0][1]
-        largest_area_heritage_listed = areas[0][1]
+        largest_area_heritage_listed = areas[0][2]
+        largest_area_shadow = areas[0][3]
 
         for area in areas:
             if area[0] > largest_area:
@@ -65,11 +69,13 @@ def get_area_by_latlng(lat, lng):
                     largest_area = area[0]
                     largest_area_heritage_zone = area[1]
                     largest_area_heritage_listed = area[2]
+                    largest_area_shadow = area[3]
                 except IndexError as e:
                     print("ERROR!! index out range")
                     print(e)
 
-        return str(largest_area) + "," + str(largest_area_heritage_zone) + "," + str(largest_area_heritage_listed)
+        return str(largest_area) + "," + str(largest_area_heritage_zone) + "," + str(largest_area_heritage_listed) +\
+            "," + str(largest_area_shadow)
     else:
         return "0,0,0"
 
